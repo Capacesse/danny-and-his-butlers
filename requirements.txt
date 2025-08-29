@@ -1,19 +1,33 @@
-pandas
+### Data Science & ML
+lightgbm
 numpy
+pandas
 scikit-learn
-transformers
-torch
+shap
+
+### Deep Learning & NLP
+accelerate
+bitsandbytes
+datasets
 sentence-transformers
-huggingface_hub
-openai
-streamlit
+torch
+transformers
+
+### Data Visualisation
 matplotlib
 seaborn
 wordcloud
-lightgbm
-accelerate
+Pillow
+
+### APIs & Hubs
+huggingface_hub
+openai
+
+### Demo App
+gradio
+
+### Utilities
+nltk
+spacy
 tqdm
 python-dotenv
-bitsandbytes
-Pillow
-gradio
