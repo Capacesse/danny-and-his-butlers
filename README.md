@@ -8,6 +8,23 @@ An end-to-end ML pipeline designed to restore trust and integrity to online revi
 
 Our solution uses a (TBC) approach:
 
+## Data Processing & Feature Engineering
+
+Our pipeline performs several steps to clean the data and extract meaningful features before modelling:
+### Text-Based Features
+The raw review text is processed to create a rich set of features that help identify spam and low-quality content, including:
+-   `has_url`: A binary flag for reviews containing URLs.
+-   `exclamation_count` / `question_mark_count`: To capture review tone.
+-   `is_zero_visit`: A flag that detects keywords like "never been" or "heard it was bad" to identify non-visitors.
+-   `all_caps_word_count`: To detect excessive use of capitalisation.
+
+### Image-Based Features (Proof of Visit)
+To validate that a review is from a genuine visitor, our pipeline analyses the attached photo:
+1.  **Image Captioning:** We use the `Salesforce/blip-image-captioning-base` model to generate a text description for each review photo.
+2.  **Irrelevant Image Filtering:** We then apply a rule-based filter to identify and flag reviews with irrelevant images (e.g., photos of menus, signs, or error messages), further cleaning our dataset.
+
+## Tech Stack & Rationale
+
 ## Setup Instructions
 
 1. Clone the repository:
