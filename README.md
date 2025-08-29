@@ -23,6 +23,11 @@ To validate that a review is from a genuine visitor, our pipeline analyses the a
 1.  **Image Captioning:** We use the `Salesforce/blip-image-captioning-base` model to generate a text description for each review photo.
 2.  **Irrelevant Image Filtering:** We then apply a rule-based filter to identify and flag reviews with irrelevant images (e.g., photos of menus, signs, or error messages), further cleaning our dataset.
 
+### Advanced NLP Features
+To convert our unified text into a machine-readable format, we engineer two sets of powerful semantic features:
+-   **TF-IDF Vectors:** We use Term Frequency-Inverse Document Frequency (TF-IDF) to capture the importance of specific keywords within the reviews, which is excellent for identifying spam and advertisements.
+-   **Sentence Embeddings:** We use a `Sentence-Transformer` model (`all-MiniLM-L6-v2`) to generate dense vector embeddings that capture the overall contextual meaning and sentiment of the review.
+
 ## Tech Stack & Rationale
 
 ## Setup Instructions
