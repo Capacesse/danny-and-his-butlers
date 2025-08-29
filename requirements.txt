@@ -31,3 +31,4 @@ nltk
 spacy
 tqdm
 python-dotenv
+vaderSentiment
