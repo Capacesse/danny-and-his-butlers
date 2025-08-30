@@ -56,8 +56,8 @@ Our solution is a multi-stage pipeline that uses a combination of rule-based log
 4. For your own testing, you must have your own dataset in the `\data` folder as well
 
 ## Team Contributions
-- **Project Lead & MLOps:** Julius Ng Hwee Chong
-- **Data Engineer:** Phoa Li Lynn Sheryl
-- **Feature Engineer & NLP Specialist:** Park Soohwan
-- **Model Developer & Pseudo-Labeling Specialist:** Danny Lee Han Keat
-- **Evaluation & Policy Engineer:** Mahesh Sanjana
+- **Project Lead & Pipelining:** Julius Ng Hwee Chong
+- **Data Preprocessing:** Phoa Li Lynn Sheryl
+- **Feature Engineer:** Park Soohwan
+- **Model Developer & Pseudo-Labelling:** Danny Lee Han Keat
+- **Policy & Evaluation:** Mahesh Sanjana
