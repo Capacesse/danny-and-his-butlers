@@ -44,9 +44,9 @@ Our solution is a multi-stage pipeline that uses a combination of rule-based log
 
 ## How to Reproduce Results
 1. Open the `/notebooks/Main_Pipeline.ipynb` notebook in Google Colab.
-2. Ensure the required dataset (`merged_reviews_4.csv` and the `dataset` folder) is in the `/data` folder within your project's Google Drive directory.
-   - `dataset` folder should have the following structure:
-`dataset`
+2. Ensure the required dataset (`merged_reviews_4.csv` and the `dataset` folder) is in the `/data` folder within your project's Google Drive directory.  
+   - `dataset` folder should have the following structure:  
+`dataset`  
 |- `indoor_atmosphere`  
 |- `menu`  
 |- `outdoor_atmosphere`  
