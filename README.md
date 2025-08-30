@@ -5,33 +5,28 @@
 An end-to-end ML pipeline designed to restore trust and integrity to online reviews. It directly addresses the core problem of low-quality, irrelevant, and fraudulent reviews which mislead consumers, unfairly harm businesses, and create a massive manual moderation burden for platforms.
 
 ## Our Pipeline
+Our solution is a multi-stage pipeline that uses a combination of rule-based logic and machine learning to achieve high accuracy.
 
-Our solution uses a (TBC) approach:
+1.  **Image Analysis & Preprocessing:** The pipeline begins by analysing the review's photo using a BLIP model to generate a text caption. This caption is merged with the original, cleaned review text to create a single, unified text field for analysis.
 
-## Data Processing & Feature Engineering
+2.  **Advanced Feature Engineering:** We convert the unified text into a rich numerical representation using two parallel techniques:
+    * **TF-IDF Vectors:** To capture the importance of specific keywords.
+    * **Sentence Embeddings:** To capture the overall contextual meaning and sentiment.
 
-Our pipeline performs several steps to clean the data and extract meaningful features before modelling:
-### Text-Based Features
-The raw review text is processed to create a rich set of features that help identify spam and low-quality content, including:
--   `has_url`: A binary flag for reviews containing URLs.
--   `exclamation_count` / `question_mark_count`: To capture review tone.
--   `is_zero_visit`: A flag that detects keywords like "never been" or "heard it was bad" to identify non-visitors.
--   `all_caps_word_count`: To detect excessive use of capitalisation.
+3.  **Two-Stage Pseudo-Labelling:** To overcome the lack of training data, we employ a two-stage labelling strategy:
+    * **Stage 1 (Rule-Based):** High-confidence rules are applied to the dataset to accurately label the most obvious cases (e.g., clear advertisements, valid reviews).
+    * **Stage 2 (Baseline Model):** A baseline `LogisticRegression` model is trained on these high-confidence labels. This model then predicts labels for the remaining, more ambiguous reviews in the dataset.
 
-### Image-Based Features (Proof of Visit)
-To validate that a review is from a genuine visitor, our pipeline analyses the attached photo:
-1.  **Image Captioning:** We use the `Salesforce/blip-image-captioning-base` model to generate a text description for each review photo.
-2.  **Irrelevant Image Filtering:** We then apply a rule-based filter to identify and flag reviews with irrelevant images (e.g., photos of menus, signs, or error messages), further cleaning our dataset.
-
-### Advanced NLP Features
-To convert our unified text into a machine-readable format, we engineer two sets of powerful semantic features:
--   **TF-IDF Vectors:** We use Term Frequency-Inverse Document Frequency (TF-IDF) to capture the importance of specific keywords within the reviews, which is excellent for identifying spam and advertisements.
--   **Sentence Embeddings:** We use a `Sentence-Transformer` model (`all-MiniLM-L6-v2`) to generate dense vector embeddings that capture the overall contextual meaning and sentiment of the review.
+4.  **Final Model Training:** A powerful **Stacking Ensemble Model** is trained on the fully labeled dataset. This final model combines the strengths of three specialised base models and a final meta-model to make the definitive classification.
 
 ## Tech Stack & Rationale
+-   **Hugging Face Transformers & PyTorch:** The backbone of our project, providing access to state-of-the-art models for image captioning (BLIP) and text understanding.
+-   **Scikit-learn & LightGBM:** Used to build our powerful stacking ensemble model, combining the reliability of logistic regression with the high performance of LightGBM.
+-   **Sentence-Transformers:** Employed to generate high-quality semantic embeddings, allowing our model to understand the nuanced meaning of reviews.
+-   **Pandas:** The primary tool for all data manipulation and management throughout the pipeline.
+-   **Joblib:** Used for saving and loading our final trained model pipeline.
 
 ## Setup Instructions
-
 1. Clone the repository:
    ```bash
    git clone [https://github.com/Capacesse/danny-and-his-butlers.git](https://github.com/Capacesse/danny-and-his-butlers.git)
@@ -48,13 +43,11 @@ To convert our unified text into a machine-readable format, we engineer two sets
 4. Set up your Hugging Face token in your Google Colab Secrets manager under the name `TikTokTechJam2025`.
 
 ## How to Reproduce Results
-
 1. Open the `/notebooks/Main_Pipeline.ipynb` notebook in Google Colab.
-2. Ensure the required dataset is in the `/data` folder.
-3. Run all cells from top to bottom to execute the full pipeline.
+2. Ensure the required dataset (`archive.zip` containing `reviews.csv` and the `dataset` folder) is in the `/data` folder within your project's Google Drive directory.
+3. Run all cells from top to bottom to execute the full training and evaluation pipeline.
 
 ## Team Contributions
-
 - **Project Lead & MLOps:** Julius Ng Hwee Chong
 - **Data Engineer:** Phoa Li Lynn Sheryl
 - **Feature Engineer & NLP Specialist:** Park Soohwan
