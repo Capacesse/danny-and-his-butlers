@@ -47,10 +47,10 @@ Our solution is a multi-stage pipeline that uses a combination of rule-based log
 2. Ensure the required dataset (`merged_reviews_4.csv` and the `dataset` folder) is in the `/data` folder within your project's Google Drive directory.
    - `dataset` folder should have the following structure:
 `dataset`
-|- `indoor_atmosphere`
-|- `menu`
-|- `outdoor_atmosphere`
-|- `taste`
+|- `indoor_atmosphere`  
+|- `menu`  
+|- `outdoor_atmosphere`  
+|- `taste`  
    
 3. Run all cells from top to bottom to execute the full training and evaluation pipeline.
 4. For your own testing, you must have your own dataset in the `\data` folder as well
