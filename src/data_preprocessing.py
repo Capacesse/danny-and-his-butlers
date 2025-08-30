@@ -15,7 +15,7 @@ def preprocess_data(input_file: str, output_file: str, image_folder_path: str) -
 
     This script takes a raw CSV, line-delimited JSON, or Excel file, cleans the
     review text, extracts a set of metadata-based features, and saves the
-    result in a new CSV file.
+    result to a new CSV file.
 
     Args:
         input_file (str): The path to the raw input file. Supported formats are
@@ -51,7 +51,7 @@ def preprocess_data(input_file: str, output_file: str, image_folder_path: str) -
     df.dropna(subset=['text'], inplace=True)
     df.reset_index(drop=True, inplace=True)
 
-    # 2. Handle missing values and standardise column names
+    # 2. Handle missing values and standardize column names
     column_mapping = {
         'pics': 'photo',
         'name': 'author_name',
@@ -67,13 +67,13 @@ def preprocess_data(input_file: str, output_file: str, image_folder_path: str) -
 
     # Fill NaN values to prevent errors during string operations
     for col in df.columns:
-        if df[col].dtype == 'object':
-            df[col].fillna('', inplace=True)
-        elif pd.api.types.is_numeric_dtype(df[col]):
-            # (updated) Use -1 as a specific placeholder for all missing numeric values
-            df[col].fillna(-1, inplace=True)
-        else:
-            df[col].fillna(-1, inplace=True)
+      if df[col].dtype == 'object':
+        df[col].fillna('', inplace=True)
+      elif pd.api.types.is_numeric_dtype(df[col]):
+        # Use -1 as a specific placeholder for all missing numeric values
+        df[col].fillna(-1, inplace=True)
+      else:
+        df[col].fillna(-1, inplace=True)
 
     # 3. Feature Extraction (on original, raw text)
     url_pattern = r'https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+|www\.[^\s/$.?#]+\.[^\s/$.?#]+|[\w\.-]+@[\w\.-]+|\b(http|https|ftp|ftps)\b'
@@ -86,7 +86,7 @@ def preprocess_data(input_file: str, output_file: str, image_folder_path: str) -
         lambda x: len(re.findall(r'\.{2,}', str(x))) if pd.notna(x) else 0
     )
     # is_zero_visit uses word boundaries
-    zero_visit_keywords = r'\b(0|zero|never visited|never been|haven\'t been|have not been|didn\'t visit)\b'
+    zero_visit_keywords = r'\b(0|zero|never visited|never been|haven\'t been|have not been|didn\'t visit|did not visit|never actually|never tried|just by looking|judging by|i can already tell|never ordered|never actually ordered|from what i\'ve heard|from whati\'ve read|from what people told me)\b'
     df['is_zero_visit'] = df['text'].apply(
         lambda x: 1 if pd.notna(x) and re.search(zero_visit_keywords, str(x).lower()) else 0
     )
@@ -97,10 +97,10 @@ def preprocess_data(input_file: str, output_file: str, image_folder_path: str) -
         lambda x: (sum(1 for char in str(x) if char.isupper()) / len(str(x))) * 100 if len(str(x)) > 0 else 0
     )
 
-    # 4. Standardise ratings to a 1-5 scale
+    # 4. Standardize ratings to a 1-5 scale
     if 'rating' in df.columns and not df['rating'].empty and pd.api.types.is_numeric_dtype(df['rating']):
         max_rating = df['rating'].max()
-        # Only standardise if max rating is greater than 5 and is a finite number
+        # Only standardize if max rating is greater than 5 and is a finite number
         if max_rating > 5 and pd.notna(max_rating) and max_rating > 0:
             df['rating'] = df['rating'].apply(lambda x: round((x / max_rating) * 5) if pd.notna(x) and x > 0 else -1)
         # Ensure ratings are at least 1, unless the original was 0 or a placeholder
@@ -110,27 +110,23 @@ def preprocess_data(input_file: str, output_file: str, image_folder_path: str) -
     # Convert to lowercase
     df['cleaned_initial_text'] = df['text'].astype(str).str.lower()
     # Remove URL or emails
-    df['cleaned_initial_text'] = df['cleaned_initial_text'].apply(
-        lambda x: re.sub(url_pattern, '', str(x), flags=re.IGNORECASE)
+    df['cleaned_initial_text'] = df['cleaned_initial_text'].apply(lambda x: re.sub(url_pattern, '', str(x), flags=re.IGNORECASE)
     )
     # Deal with numbers
-    df['cleaned_initial_text'] = df['cleaned_initial_text'].apply(
-        lambda x: re.sub(r'\b\d+\b', '<NUM>', str(x))
+    df['cleaned_initial_text'] = df['cleaned_initial_text'].apply(lambda x: re.sub(r'\b\d+\b', '<NUM>', str(x))
     )
     # Remove special characters and punctuation
-    df['cleaned_initial_text'] = df['cleaned_initial_text'].apply(
-        lambda x: re.sub(r'[^a-z0-9\s<>]', '', str(x))
+    df['cleaned_initial_text'] = df['cleaned_initial_text'].apply(lambda x: re.sub(r'[^a-z0-9\s<>]', '', str(x))
     )
     # Tidy up whitespace
-    df['cleaned_initial_text'] = df['cleaned_initial_text'].apply(
-        lambda x: re.sub(r'\s+', ' ', str(x)).strip()
+    df['cleaned_initial_text'] = df['cleaned_initial_text'].apply(lambda x: re.sub(r'\s+', ' ', str(x)).strip()
     )
 
     # 6. Find word_count and char_count from this initial cleaned text
     df['word_count'] = df['cleaned_initial_text'].apply(lambda x: len(x.split()) if len(x.strip()) > 0 else 0)
     df['char_count'] = df['cleaned_initial_text'].str.len()
 
-    # (updated) 7. Generate and clean image descriptions
+    # 7. Generate and clean image descriptions
     print("\nLoading Salesforce/blip-image-captioning-base model...")
     try:
         # Use a publicly available model like Salesforce/blip-image-captioning-base
@@ -140,53 +136,35 @@ def preprocess_data(input_file: str, output_file: str, image_folder_path: str) -
         print(f"Error loading model: {e}")
         image_to_text_pipeline = None
 
-    def get_image_description(photo_path):
+    def get_image_description(photo_path, image_folder):
         """Helper function to process a single photo path."""
-        if not photo_path or not os.path.exists(photo_path) or image_to_text_pipeline is None:
+        # Join the base folder and the photo path to get the full file path
+        full_path = os.path.join(image_folder, photo_path)
+        if not full_path or not os.path.exists(full_path) or image_to_text_pipeline is None:
             return ""
         try:
-            image = Image.open(photo_path).convert("RGB")
+            image = Image.open(full_path).convert("RGB")
             # Generate description and clean it immediately
             description = image_to_text_pipeline(image)[0]['generated_text']
             description = re.sub(r'[^a-z0-9\s<>]', '', description.lower()).strip()
             return f"a photo shows {description}. "
         except Exception as e:
-            print(f"Error processing image {photo_path}: {e}")
+            print(f"Error processing image {full_path}: {e}")
             return ""
 
     # Apply the function to the 'photo' column to create the new cleaned_image_description column
     # The .apply method handles each row, including cases where 'photo' might be a list
     df['cleaned_image_description'] = df['photo'].apply(
-        lambda p: get_image_description(p[0]) if isinstance(p, list) and p else get_image_description(p)
-    )
-
-
-    # 7. Generate and clean image descriptions
-    def get_image_description(photo_path):
-        if not photo_path or not os.path.exists(photo_path):
-            return ""
-        try:
-            image = Image.open(photo_path).convert("RGB")
-            # Generate description and clean it immediately
-            description = image_to_text_pipeline(image)[0]['generated_text']
-            description = re.sub(r'[^a-z0-9\s<>]', '', description.lower()).strip()
-            return f"a photo shows {description}. "
-        except Exception as e:
-            print(f"Error processing image {photo_path}: {e}")
-            return ""
-
-    df['cleaned_image_description'] = df['photo'].apply(
-        lambda p: get_image_description(p[0]) if isinstance(p, list) and p else get_image_description(p)
+        lambda p: get_image_description(p[0], image_folder_path) if isinstance(p, list) and p else get_image_description(p, image_folder_path)
     )
 
     # 8. Merge the cleaned text with the cleaned image descriptions
     df['unified_text'] = df['cleaned_initial_text'].fillna('') + ' ' + df['cleaned_image_description'].fillna('')
     df['unified_text'] = df['unified_text'].str.strip()
 
-    # 9. Finalise DataFrame preparation
+    # 9. Finalize DataFrame preparation
     final_df = df.drop(columns=['text', 'cleaned_initial_text', 'cleaned_image_description'])
     final_df.rename(columns={'unified_text': 'text'}, inplace=True)
-
 
     # Convert data types to match the specified contract
     final_df['has_url'] = final_df['has_url'].astype('int64')
@@ -201,12 +179,15 @@ def preprocess_data(input_file: str, output_file: str, image_folder_path: str) -
 
     if 'rating_category' in final_df.columns:
         final_df['rating_category'] = final_df['rating_category'].astype('category')
-
-    # Convert key text columns to pandas 'string' type for explicit data contract adherence
-    final_df['text'] = final_df['text'].astype('string')
-    final_df['photo'] = final_df['photo'].astype('string')
-    final_df['author_name'] = final_df['author_name'].astype('string')
-    final_df['business_name'] = final_df['business_name'].astype('string')
+    for col in final_df.columns:
+        if col in ['text', 'photo', 'author_name', 'business_name']:
+            final_df[col] = final_df[col].astype('string')
+        elif col in ['has_url', 'is_zero_visit', 'word_count', 'char_count', 'exclamation_count', 'question_mark_count', 'ellipsis_count', 'all_caps_word_count', 'rating']:
+            final_df[col] = final_df[col].astype('int64')
+        elif col == 'capital_letter_percentage':
+            final_df[col] = final_df[col].astype('float64')
+        elif col == 'rating_category' and 'rating_category' in final_df.columns: # one category is string and other is boolean (if data has rating_category or not) -> it is combined here to form one 'category' column
+            final_df[col] = final_df[col].astype('category')
 
     final_df.to_csv(output_file, index=False)
     print(f"Data preprocessing complete. Saved to '{output_file}' with {len(final_df)} rows.")

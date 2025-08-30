@@ -7,7 +7,6 @@ shap
 
 ### Deep Learning & NLP
 accelerate
-bitsandbytes
 datasets
 sentence-transformers
 torch
